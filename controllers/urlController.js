@@ -27,7 +27,11 @@ encode=function(str)
 }
 
 exports.hashUrl=(request,response) => {
-    console.log(request.body);
+    if(request.body.url.length()==0){
+        return response.status(200).json({
+            hashUrl: ""
+        })
+    }
     var urlHashCode=encode(request.body.url);
 
     console.log(urlHashCode);
