@@ -9,7 +9,7 @@ var routes=require("./routes");
 var config=require("../config/config");
 
 var app=express();
-var port=3500;
+var port=process.env.PORT || 3500;
 
 app.use(cors());
 
