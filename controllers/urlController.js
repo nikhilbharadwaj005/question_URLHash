@@ -1,9 +1,12 @@
+// Database collection Models
 var hashCodesModel=require("../models/hashCodes");
 var visitedCodesModel=require("../models/visitedCodes");
 
+//planned to use redis 
+//but using an object to cache hashcode and its urls
 var cacheCodes={}
 
-
+// Used polynomial rolling hash function. Used below resource
 // https://www.geeksforgeeks.org/string-hashing-using-polynomial-rolling-hash-function/
 
 encode=function(str)
@@ -27,20 +30,24 @@ encode=function(str)
 }
 
 exports.hashUrl=(request,response) => {
+
+    //if empty url is provided
     if(request.body.url.length==0){
         return response.status(200).json({
             hashUrl: ""
         })
     }
+
+    //hash the url
     var urlHashCode=encode(request.body.url);
 
-    console.log(urlHashCode);
 
     var HashUrlRecord = new hashCodesModel({
         hashCode: urlHashCode,
         longUrl: request.body.url
     });
 
+    //save the hashcode and url mapping
     HashUrlRecord.save((err,savedHashUrl) => {
         if(err){
             console.log(err);
@@ -58,13 +65,17 @@ exports.hashUrl=(request,response) => {
 
 exports.visitUrl=(request,response) => {
 
+    // check in cache object if visited, if visited, respond with 204
     if(cacheCodes[request.params.id]!=undefined){
         return response.status(204).json({
             message: "You can use this url only once"
         })
     }
 
+    //else find and mark as visited in DB and cache as well
+
     visitedCodesModel.findOne({hashCode: request.params.id}).then((visitedCode) => {
+
         if(visitedCode){
             // return 204 no content response
             return response.status(204).json({
@@ -88,13 +99,18 @@ exports.visitUrl=(request,response) => {
 
                 hashCodesModel.findOne({hashCode: request.params.id}).then((foundRecord) => {
                     if(foundRecord){   
+
+                        // add http is not present (eg: google.com turns to http://google.com)
                         if(foundRecord.longUrl.indexOf("http")<0){
+                            cacheCodes[request.params.id]="http://"+foundRecord.longUrl;
                             return response.redirect(307, "http://"+foundRecord.longUrl);
                         } 
-
+                        
                         cacheCodes[request.params.id]=foundRecord.longUrl;
                         return response.redirect(307, foundRecord.longUrl);
                     }else{
+
+                        // if wrong hashcode is given
                         return response.status(404).json({
                             message: "URL doesn't exists"
                         })

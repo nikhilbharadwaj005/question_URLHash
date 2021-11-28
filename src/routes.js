@@ -6,6 +6,6 @@ var routes=express.Router();
 
 
 routes.post("/hashUrl",urlController.hashUrl);
-routes.get("/:id",urlController.visitUrl);
+routes.get("/:id",urlController.visitUrl);  // here :id is the hashcode generated
 
 module.exports=routes;

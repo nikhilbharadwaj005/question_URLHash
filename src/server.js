@@ -1,13 +1,14 @@
+//imports
 var express=require('express');
-
 var bodyParser=require('body-parser');
-
 var mongoose=require('mongoose');
 var cors=require('cors');
 
+//import files
 var routes=require("./routes");
 var config=require("../config/config");
 
+// configuring server
 var app=express();
 var port=process.env.PORT || 3500;
 
@@ -21,6 +22,7 @@ app.use(bodyParser.json())
 
 app.use('/',routes);
 
+// Connect to Database
 mongoose.connect(config.db,{ useNewUrlParser: true, useUnifiedTopology: true });
 
 const connection=mongoose.connection;
