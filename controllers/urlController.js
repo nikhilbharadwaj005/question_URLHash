@@ -44,7 +44,7 @@ exports.hashUrl=(request,response) => {
 
         
         return response.status(200).json({
-            hashUrl: "http://localhost:3500/"+savedHashUrl.hashCode
+            hashUrl: "https://question-url-hash-ilfn3.ondigitalocean.app/"+savedHashUrl.hashCode
         })
     })
 }
