@@ -27,7 +27,7 @@ encode=function(str)
 }
 
 exports.hashUrl=(request,response) => {
-    if(request.body.url.length()==0){
+    if(request.body.url.length==0){
         return response.status(200).json({
             hashUrl: ""
         })
