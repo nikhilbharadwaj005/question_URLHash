@@ -1,6 +1,9 @@
 var hashCodesModel=require("../models/hashCodes");
 var visitedCodesModel=require("../models/visitedCodes");
 
+var cacheCodes={}
+
+
 // https://www.geeksforgeeks.org/string-hashing-using-polynomial-rolling-hash-function/
 
 encode=function(str)
@@ -50,6 +53,13 @@ exports.hashUrl=(request,response) => {
 }
 
 exports.visitUrl=(request,response) => {
+
+    if(cacheCodes[request.params.id]!=undefined){
+        return response.status(204).json({
+            message: "You can use this url only once"
+        })
+    }
+
     visitedCodesModel.findOne({hashCode: request.params.id}).then((visitedCode) => {
         if(visitedCode){
             // return 204 no content response
@@ -57,6 +67,9 @@ exports.visitUrl=(request,response) => {
                 message: "You can use this url only once"
             })
         }else{
+
+            
+
             var markVisited=new visitedCodesModel({
                 hashCode: request.params.id
             });
@@ -74,6 +87,8 @@ exports.visitUrl=(request,response) => {
                         if(foundRecord.longUrl.indexOf("http")<0){
                             return response.redirect(307, "http://"+foundRecord.longUrl);
                         } 
+
+                        cacheCodes[request.params.id]=foundRecord.longUrl;
                         return response.redirect(307, foundRecord.longUrl);
                     }else{
                         return response.status(404).json({
